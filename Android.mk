@@ -12,6 +12,7 @@ LOCAL_SRC_FILES := \
     ui.c \
     mounts.c \
     extendedcommands.c \
+    midnight.c \
     nandroid.c \
     ../../system/core/toolbox/reboot.c \
     firmware.c \
