@@ -44,6 +44,8 @@
 #include "extendedcommands.h"
 #include "flashutils/flashutils.h"
 
+#include "midnight.h"
+
 static const struct option OPTIONS[] = {
   { "send_intent", required_argument, NULL, 's' },
   { "update_package", required_argument, NULL, 'u' },
@@ -220,9 +222,7 @@ get_args(int *argc, char ***argv) {
         strlcat(boot.recovery, (*argv)[i], sizeof(boot.recovery));
         strlcat(boot.recovery, "\n", sizeof(boot.recovery));
     }
-    if (device_flash_type() == MTD) {
-        set_bootloader_message(&boot);
-    }
+    set_bootloader_message(&boot);
 }
 
 void
@@ -284,12 +284,10 @@ finish_recovery(const char *send_intent) {
     copy_log_file(LAST_LOG_FILE, false);
     chmod(LAST_LOG_FILE, 0640);
 
-    if (device_flash_type() == MTD) {
-        // Reset to mormal system boot so recovery won't cycle indefinitely.
-        struct bootloader_message boot;
-        memset(&boot, 0, sizeof(boot));
-        set_bootloader_message(&boot);
-    }
+    // Reset to normal system boot so recovery won't cycle indefinitely.
+    struct bootloader_message boot;
+    memset(&boot, 0, sizeof(boot));
+    set_bootloader_message(&boot);
 
     // Remove the command file, so recovery won't repeat indefinitely.
     if (ensure_path_mounted(COMMAND_FILE) != 0 ||
@@ -743,48 +741,21 @@ prompt_and_wait() {
             case ITEM_ADVANCED:
                 show_advanced_menu();
                 break;
-                
+
+            case ITEM_MIDNIGHT:
+                show_midnight_menu();
+                break;
+
+/*                
             case ITEM_DISABLE_MN_SETTINGS:
-                if(0 == __system("touch /cache/midnight_block")){
-                    ui_print("\nBlocker file created, MidnightControl\n");
-                    ui_print("settings will not be applied at next boot.\n");
-                }else{
-                    ui_print("\nFailed to create /system/etc/midnight_block,\n");
-                    ui_print("sorry.\n");
-                }
-                break;                
+
                 
             case ITEM_DELETE_NSTOOLS_SETTINGS:
-                if (confirm_selection("Confirm deleting NSTools settings?", "Yes - delete NSTools settings")){
-                    if (0 == ensure_path_mounted("/data")){
-                        ensure_path_mounted("/datadata"); // /data/data possible symlink to /datadata
-                        if(0 == __system("rm /data/data/mobi.cyann.nstools/shared_prefs/mobi.cyann.nstools_preferences.xml")){
-                            ui_print("\nNSTools settings deleted.\n");
-                        }else{
-                            ui_print("\nDeleting NSTools settings failed, sorry.\n");
-                        }                
-                    }else{
-                        ui_print("\nError mounting /data, exiting...!\n");
-                        break;
-                    }
-                }
-                break;    
+
                             
             case ITEM_DELETE_INITD:
-                if (confirm_selection("Confirm clearing init.d?", "Yes - completely clear init.d")){
-                    if (0 == ensure_path_mounted("/system")){
-                        if(0 == __system("rm -r /system/etc/init.d/*")){
-                            ui_print("\n/system/etc/init.d cleared.\n");
-                        }else{
-                            ui_print("\nClearing init.d failed, sorry.\n");
-                        }                
-                    }else{
-                        ui_print("\nError mounting /system, exiting...!\n");
-                        break;
-                    }
-                }
-                break;    
 
+*/
             //case ITEM_POWEROFF:
             //    poweroff = 1;
             //    return;
