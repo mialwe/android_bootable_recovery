@@ -328,10 +328,9 @@ void show_options_menu() {
         "NOOP IO scheduler             [default:SIO]",
         "Ondemand CPU governor [default: Conservat.]",
         "512Kb sdcard readahead       [default: 256]",
-        "USB fast_charge mode         [default: off]",
         NULL};
-    int num=7;
-    const char* cnfv[]={"INITD","OC1128","TOUCHWAKE","NOOP","ONDEMAND","512","FASTCHARGE"};
+    int num=6;
+    const char* cnfv[]={"INITD","OC1128","TOUCHWAKE","NOOP","ONDEMAND","512"};
     const char* cnff="/data/local/midnight_options.conf";
     custom_menu(h,m,num,cnfv,cnff,0);
 }
