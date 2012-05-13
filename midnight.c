@@ -322,73 +322,13 @@ void show_options_menu() {
         "",
         NULL};
     const char* m[]={
-        "init.d/userinit.d            [default: off]",
-        "1.128Ghz overclocking       [default: 1Ghz]",
-        "touchwake                    [default: off]",
-        "NOOP IO scheduler             [default:SIO]",
-        "Ondemand CPU governor [default: Conservat.]",
-        "512Kb sdcard readahead       [default: 256]",
+        "toggle init.d/userinit.d",
+        "toggle OC 1.128Ghz",
         NULL};
-    int num=6;
-    const char* cnfv[]={"INITD","OC1128","TOUCHWAKE","NOOP","ONDEMAND","512"};
+    int num=2;
+    const char* cnfv[]={"INITD","OC1128"};
     const char* cnff="/data/local/midnight_options.conf";
     custom_menu(h,m,num,cnfv,cnff,0);
-}
-
-void show_uv_menu() {
-    const char* h[]={
-        "undervolting profiles",
-        "",
-        "",
-        NULL};
-    const char* m[]={
-        " 0   0   0   0   0 mV [default]",
-        " 0   0  25  50  75 mV",
-        " 0   0  25  75 100 mV",
-        " 0   0  50  75 125 mV",
-        NULL};
-    int num=4;
-    const char* cnfv[]={"DEFAULT","UV1","UV2","UV3"};
-    const char* cnff="/data/local/midnight_uv.conf";
-    custom_menu(h,m,num,cnfv,cnff,1);
-}
-
-void show_vibration_menu() {
-    const char* h[]={
-        "vibration intensity profiles",
-        "",
-        "",
-        NULL};
-    const char* m[]={
-        " none",
-        " 25000",
-        " 30000",
-        " 35000",
-        " stock [default]",
-        NULL};
-    int num=5;
-    const char* cnfv[]={"VIB0","VIB1","VIB2","VIB3","DEFAULT"};
-    const char* cnff="/data/local/midnight_vibration.conf";
-    custom_menu(h,m,num,cnfv,cnff,1);
-}
-
-void show_led_menu() {
-    const char* h[]={
-        "touch LED timeout",
-        "",
-        "",
-        NULL};
-    const char* m[]={
-        " 250ms",
-        " 500ms",
-        " 750ms",
-        " 1000ms",
-        " stock [default]",
-        NULL};
-    int num=5;
-    const char* cnfv[]={"LED0","LED1","LED2","LED3","DEFAULT"};
-    const char* cnff="/data/local/midnight_led.conf";
-    custom_menu(h,m,num,cnfv,cnff,1);
 }
 
 void show_logcat_menu() {
@@ -435,10 +375,8 @@ void show_midnight_menu() {
     };
 
     static char* list[] = { "options",
-                            "undervolting profiles",
-                            "vibration intensity",
-                            "touch LED timeout",
                             "logcat",
+                            "block kernel-app settings next boot",
                             "remove init.d content",
                             "remove nstools settings",
                             NULL
@@ -454,16 +392,7 @@ void show_midnight_menu() {
             case 0: // options
                 show_options_menu();
               break;
-            case 1: // uv
-                show_uv_menu();
-              break;
-            case 2: // uv
-                show_vibration_menu();
-              break;
-            case 3: // uv
-                show_led_menu();
-              break;
-            case 4: // logcat
+            case 1: // logcat
                 if (0 == ensure_path_mounted("/system")){
                     if (0 == ensure_path_mounted("/data")){
                         show_logcat_menu();
@@ -475,7 +404,16 @@ void show_midnight_menu() {
                     ui_print("\nError mounting /system, exiting...\n");
                 }
                 break;
-            case 5: // init.d
+            case 2: // block
+                if(0 == __system("touch /cache/midnight_block")){
+                    ui_print("\nBlocker file created, MidnightControl\n");
+                    ui_print("settings will not be applied at next boot.\n");
+                }else{
+                    ui_print("\nFailed to create /cache/midnight_block,\n");
+                    ui_print("sorry.\n");
+                }
+              break;
+            case 3: // init.d
                 if (confirm_selection("Confirm clearing init.d?", "Yes - completely clear init.d")){
                     if (0 == ensure_path_mounted("/system")){
                         if(0 == __system("rm -r /system/etc/init.d/*")){
@@ -490,7 +428,7 @@ void show_midnight_menu() {
                     }
                 }
               break;
-            case 6: // nstools
+            case 4: // nstools
                 if (confirm_selection("Confirm deleting NSTools settings?", "Yes - delete NSTools settings")){
                     if (0 == ensure_path_mounted("/data")){
                         ensure_path_mounted("/datadata"); // /data/data possible symlink to /datadata
